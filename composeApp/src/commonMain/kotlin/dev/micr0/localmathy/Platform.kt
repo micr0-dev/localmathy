@@ -1,6 +1,7 @@
 package dev.micr0.localmathy
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 /** The app's user-facing version name (e.g. "1.0"), from the build config. */
 expect val appVersionName: String
