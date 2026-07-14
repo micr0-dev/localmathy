@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+val abiFilter = findProperty("abiFilter") as String?
+
 kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -46,8 +48,6 @@ android {
     namespace = "dev.micr0.localmathy"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    val abiFilter = findProperty("abiFilter") as String?
-
     defaultConfig {
         applicationId = "dev.micr0.localmathy"
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -55,10 +55,9 @@ android {
         versionCode = 5
         versionName = "1.0.4"
 
-        val abiFilterProp = findProperty("abiFilter") as String?
-        if (abiFilterProp != null) {
+        if (abiFilter != null) {
             ndk {
-                abiFilters += abiFilterProp
+                abiFilters += abiFilter
             }
         }
     }
@@ -117,12 +116,11 @@ android {
 }
 
 android.applicationVariants.all {
-    val abiFilterProp = findProperty("abiFilter") as String?
-    if (abiFilterProp != null) {
+    if (abiFilter != null) {
         val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
         outputs.all {
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).versionCodeOverride =
-                android.defaultConfig.versionCode!! * 10 + (abiCodes[abiFilterProp] ?: 0)
+            (this as com.android.build.gradle.api.BaseVariantOutput).versionCodeOverride =
+                5 * 10 + (abiCodes[abiFilter] ?: 0)
         }
     }
 }
