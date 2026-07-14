@@ -54,12 +54,6 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 6
         versionName = "1.0.5"
-
-        if (abiFilter != null) {
-            ndk {
-                abiFilters += abiFilter
-            }
-        }
     }
 
     // VERSION_NAME is surfaced to the UI via the Platform expect/actual.
