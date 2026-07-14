@@ -1,5 +1,6 @@
 package dev.micr0.localmathy
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -51,6 +53,7 @@ fun SettingsScreen(
     var confirmClearHistory by remember { mutableStateOf(false) }
     var confirmDeleteModel by remember { mutableStateOf(false) }
     var confirmDeleteVisionModel by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -185,6 +188,24 @@ fun SettingsScreen(
                 "Offline, on-device math solving. Free software (AGPL-3.0).",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "View the source code",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    uriHandler.openUri("https://github.com/micr0-dev/localmathy")
+                },
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Found a bug? Report an issue",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    uriHandler.openUri("https://github.com/micr0-dev/localmathy/issues")
+                },
             )
         }
     }
