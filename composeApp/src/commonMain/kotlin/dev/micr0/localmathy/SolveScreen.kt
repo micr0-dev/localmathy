@@ -94,7 +94,7 @@ private fun QuestionInput(
         Text("Ask a math question", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(4.dp))
         Text(
-            "One question, one answer — VibeThinker is single-turn, so follow-ups " +
+            "One question, one answer. VibeThinker is configured to be single-turn, so follow-ups " +
                 "aren't possible. Make the question self-contained.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
