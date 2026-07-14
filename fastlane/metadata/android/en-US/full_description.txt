@@ -1,0 +1,21 @@
+LocalMathy solves math problems entirely on your device. Nothing you type or photograph ever leaves your phone — there is no account, no cloud, and no network call once the model is set up.
+
+It runs VibeThinker-3B, a compact reasoning model, through Google's LiteRT on-device runtime. Ask a question and the app streams the model's step-by-step reasoning into a collapsible pane, then renders a clean final answer with full Markdown and LaTeX math.
+
+<b>Features</b>
+
+* Fully offline and private — all inference runs locally on the GPU (with a CPU fallback)
+* Step-by-step reasoning you can expand or hide
+* Answers rendered with proper Markdown and LaTeX math typesetting
+* Tap a boxed answer to copy it
+* Solve from a photo — snap or pick a picture of a problem, crop it, and an optional on-device vision model reads it into an editable question
+* Optional local history of your questions and answers
+* Light and dark themes
+
+<b>Getting the model</b>
+
+On first launch you download the reasoning model (about 1.9 GB) from Hugging Face, or import a .litertlm file you already have. It is stored on-device and only needs to be set up once. Photo solving uses a separate optional vision model you can add later.
+
+<b>Note</b>
+
+VibeThinker is a single-turn model: each question is answered on its own, and follow-up questions are not possible. Make each question self-contained.

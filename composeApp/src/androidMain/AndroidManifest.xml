@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Only used to download the model file; inference is fully offline. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Keep solving while the app is in the background / screen is off. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:name=".LocalMathyApp"
+        android:label="LocalMathy"
+        android:icon="@android:drawable/sym_def_app_icon"
+        android:largeHeap="true"
+        android:theme="@style/Theme.LocalMathy">
+
+        <!-- On Android 12+ the vendor OpenCL driver is only visible to apps
+             that declare it; without these the GPU backend can't load.
+             Different vendors ship it under different names. -->
+        <uses-native-library
+            android:name="libOpenCL.so"
+            android:required="false" />
+        <uses-native-library
+            android:name="libOpenCL-pixel.so"
+            android:required="false" />
+        <uses-native-library
+            android:name="libOpenCL-car.so"
+            android:required="false" />
+
+        <!-- Lets us hand the system camera app a file Uri to write the photo to. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <service
+            android:name=".GenerationService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="On-device LLM math solving in progress" />
+        </service>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

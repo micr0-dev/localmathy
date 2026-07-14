@@ -1,0 +1,1 @@
+Solve math problems fully offline with an on-device AI reasoning model

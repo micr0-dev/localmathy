@@ -1,0 +1,21 @@
+[versions]
+agp = "8.9.2"
+kotlin = "2.2.21"
+composeMultiplatform = "1.11.1"
+activityCompose = "1.10.1"
+coroutines = "1.10.2"
+litertlm = "0.14.0"
+android-compileSdk = "35"
+android-minSdk = "26"
+android-targetSdk = "35"
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+litertlm-android = { module = "com.google.ai.edge.litertlm:litertlm-android", version.ref = "litertlm" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

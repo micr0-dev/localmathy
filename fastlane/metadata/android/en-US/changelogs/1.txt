@@ -1,0 +1,7 @@
+First release.
+
+* Offline math solving with VibeThinker-3B on LiteRT
+* Step-by-step reasoning with Markdown + LaTeX answers
+* Solve from a photo with an optional on-device vision model
+* Optional on-device history
+* Light and dark themes

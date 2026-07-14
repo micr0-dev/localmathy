@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="katex.min.css">
+<script src="marked.js"></script>
+<script src="katex.min.js"></script>
+<style>
+  :root {
+    color-scheme: light dark;
+    --fg: #1b1b1f;
+    --fg-dim: #5f5f66;
+    --code-bg: rgba(127, 127, 127, 0.14);
+    --border: rgba(127, 127, 127, 0.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fg: #e4e2e6;
+      --fg-dim: #a5a3ab;
+    }
+  }
+  /* The host app sets data-theme explicitly; on Android the WebView's
+     prefers-color-scheme does not reliably follow the app theme. These win
+     over the media query above by attribute specificity. */
+  :root[data-theme="light"] {
+    --fg: #1b1b1f;
+    --fg-dim: #5f5f66;
+  }
+  :root[data-theme="dark"] {
+    --fg: #e4e2e6;
+    --fg-dim: #a5a3ab;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--fg);
+    font-family: system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    word-wrap: break-word;
+  }
+  #content { padding: 2px 2px 24px 2px; }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  h1 { font-size: 1.4em; } h2 { font-size: 1.25em; } h3 { font-size: 1.1em; }
+  p { margin: 0.6em 0; }
+  code {
+    background: var(--code-bg);
+    border-radius: 4px;
+    padding: 1px 4px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 10px;
+    overflow-x: auto;
+  }
+  pre code { background: none; padding: 0; }
+  blockquote {
+    margin: 0.6em 0;
+    padding-left: 10px;
+    border-left: 3px solid var(--border);
+    color: var(--fg-dim);
+  }
+  table { border-collapse: collapse; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--border); padding: 4px 8px; }
+  .katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+  .math-error { color: #c0392b; font-family: monospace; }
+  .copy-boxed { cursor: pointer; -webkit-tap-highlight-color: rgba(127,127,127,0.25); }
+  .copy-boxed:active { opacity: 0.6; }
+</style>
+</head>
+<body>
+<div id="content"></div>
+<script>
+  // Math must be pulled out before markdown parsing, otherwise marked mangles
+  // backslashes and underscores inside LaTeX. Placeholders are restored as
+  // KaTeX-rendered HTML afterwards.
+  var MATH_PATTERNS = [
+    { re: /\$\$([\s\S]+?)\$\$/g, display: true },
+    { re: /\\\[([\s\S]+?)\\\]/g, display: true },
+    { re: /\\\(([\s\S]+?)\\\)/g, display: false },
+    { re: /\$([^\$\n]+?)\$/g, display: false }
+  ];
+
+  // Pulls the balanced-brace argument out of the first \boxed{...} in tex.
+  function extractBoxed(tex) {
+    var i = tex.indexOf('\\boxed');
+    if (i < 0) return null;
+    var j = tex.indexOf('{', i);
+    if (j < 0) return null;
+    var depth = 0;
+    for (var k = j; k < tex.length; k++) {
+      if (tex[k] === '{') depth++;
+      else if (tex[k] === '}') {
+        depth--;
+        if (depth === 0) return tex.substring(j + 1, k);
+      }
+    }
+    return null;
+  }
+
+  // Makes the boxed LaTeX pleasant to paste: unwrap \text{}, drop \left/\right
+  // and spacing commands, collapse whitespace.
+  function cleanForClipboard(tex) {
+    return tex
+      .replace(/\\text\s*\{([^{}]*)\}/g, '$1')
+      .replace(/\\(left|right)\b/g, '')
+      .replace(/\\[,;!:]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function escapeAttr(s) {
+    return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderMarkdownWithMath(md) {
+    var stash = [];
+    var text = md;
+    MATH_PATTERNS.forEach(function (p) {
+      text = text.replace(p.re, function (_, body) {
+        var idx = stash.length;
+        stash.push({ body: body, display: p.display });
+        return ' MATHSTASH' + idx + 'X ';
+      });
+    });
+
+    var html = marked.parse(text);
+
+    return html.replace(/ ?MATHSTASH(\d+)X ?/g, function (_, idxStr) {
+      var m = stash[Number(idxStr)];
+      var rendered;
+      try {
+        rendered = katex.renderToString(m.body, {
+          displayMode: m.display,
+          throwOnError: false
+        });
+      } catch (e) {
+        return '<span class="math-error">' + m.body + '</span>';
+      }
+      var boxed = extractBoxed(m.body);
+      if (boxed !== null) {
+        rendered = '<span class="copy-boxed" data-copy="'
+          + escapeAttr(cleanForClipboard(boxed)) + '">' + rendered + '</span>';
+      }
+      return rendered;
+    });
+  }
+
+  // Tapping a boxed answer copies it via the Kotlin bridge (clipboard + toast).
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-copy]') : null;
+    if (el && window.LocalMathy) {
+      window.LocalMathy.copy(el.getAttribute('data-copy'));
+    }
+  });
+
+  // Called by the host app so the WebView follows the real app theme instead
+  // of the WebView's own (unreliable) prefers-color-scheme.
+  function setTheme(dark) {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+  }
+
+  function setContentB64(b64) {
+    var bytes = Uint8Array.from(atob(b64), function (c) { return c.charCodeAt(0); });
+    var md = new TextDecoder('utf-8').decode(bytes);
+    document.getElementById('content').innerHTML = renderMarkdownWithMath(md);
+  }
+</script>
+</body>
+</html>
