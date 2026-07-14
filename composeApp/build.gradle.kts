@@ -52,18 +52,13 @@ android {
         applicationId = "dev.micr0.localmathy"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = when (abiFilter) {
-            "armeabi-v7a" -> 41
-            "arm64-v8a"   -> 42
-            "x86"         -> 43
-            "x86_64"      -> 44
-            else          -> 4   // universal/local/CI builds with no filter
-        }
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.4"
 
-	if (abiFilter != null) {
+        val abiFilterProp = findProperty("abiFilter") as String?
+        if (abiFilterProp != null) {
             ndk {
-                 abiFilters += abiFilter
+                abiFilters += abiFilterProp
             }
         }
     }
@@ -118,5 +113,16 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+}
+
+android.applicationVariants.all {
+    val abiFilterProp = findProperty("abiFilter") as String?
+    if (abiFilterProp != null) {
+        val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).versionCodeOverride =
+                android.defaultConfig.versionCode!! * 10 + (abiCodes[abiFilterProp] ?: 0)
+        }
     }
 }
