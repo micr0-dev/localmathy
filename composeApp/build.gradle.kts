@@ -46,12 +46,26 @@ android {
     namespace = "dev.micr0.localmathy"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    val abiFilter = findProperty("abiFilter") as String?
+
     defaultConfig {
         applicationId = "dev.micr0.localmathy"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = when (abiFilter) {
+            "armeabi-v7a" -> 41
+            "arm64-v8a"   -> 42
+            "x86"         -> 43
+            "x86_64"      -> 44
+            else          -> 4   // universal/local/CI builds with no filter
+        }
+        versionName = "1.0.3"
+
+	if (abiFilter != null) {
+            ndk {
+                 abiFilters += abiFilter
+            }
+        }
     }
 
     // VERSION_NAME is surfaced to the UI via the Platform expect/actual.
