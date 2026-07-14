@@ -1,0 +1,55 @@
+# --- Gradle ---
+.gradle/
+build/
+**/build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# --- Local config (machine-specific, never commit) ---
+local.properties
+
+# --- IDE (IntelliJ / Android Studio) ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# --- Kotlin / Kotlin Multiplatform ---
+.kotlin/
+kotlin-js-store/
+
+# --- Android ---
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+release/
+
+# --- iOS / Xcode (if/when iosApp/ is added) ---
+iosApp/build/
+iosApp/Pods/
+iosApp/*.xcworkspace/xcuserdata/
+iosApp/*.xcodeproj/xcuserdata/
+iosApp/*.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+*.hmap
+*.ipa
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Secrets ---
+*.keystore
+*.jks
+!fdroidserver/tests/keystore.jks
+.env
