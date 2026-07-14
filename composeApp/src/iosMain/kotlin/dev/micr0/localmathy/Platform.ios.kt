@@ -31,3 +31,8 @@ actual fun ImageCropView(
 ) {
     // Never reached on iOS: the photo feature is Android-only (ImagePicker is null there).
 }
+
+@Composable
+actual fun AppLogo(modifier: Modifier) {
+    // No bundled asset on iOS (stub target).
+}

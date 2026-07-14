@@ -8,6 +8,10 @@ expect val appVersionName: String
 /** "Jun 3, 2026 14:05"-style local timestamp for history entries. */
 expect fun formatTimestamp(epochMillis: Long): String
 
+/** The rounded LocalMathy logo. No-op on platforms without the asset. */
+@Composable
+expect fun AppLogo(modifier: Modifier = Modifier)
+
 /**
  * Intercepts the platform back gesture while [enabled]. Android maps this to
  * androidx BackHandler; iOS has no system back gesture, so it's a no-op there.
