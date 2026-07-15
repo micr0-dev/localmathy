@@ -1,3 +1,4 @@
+import com.android.build.api.variant.FilterConfiguration
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -7,8 +8,6 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 }
-
-val abiFilter = findProperty("abiFilter") as String?
 
 kotlin {
     androidTarget {
@@ -52,8 +51,24 @@ android {
         applicationId = "dev.micr0.localmathy"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 8
-        versionName = "1.0.7"
+        // NOTE: version codes now stride by 10 per release so per-ABI
+        // offsets (+1..+4) never collide across releases.
+        versionCode = 10
+        versionName = "1.0.8"
+    }
+
+    // Split APKs by ABI. litertlm-android only ships native libs for
+    // arm64-v8a and x86_64, so those are the only ABIs we can build.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            // Also produce a universal APK (used for GitHub releases).
+            // F-Droid strips this line in prebuild and builds one ABI per
+            // build block instead.
+            isUniversalApk = true
+        }
     }
 
     // VERSION_NAME is surfaced to the UI via the Platform expect/actual.
@@ -106,5 +121,30 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+}
+
+// Per-ABI version codes, F-Droid convention: armeabi-v7a < arm64-v8a < x86 < x86_64.
+// Full map kept so codes stay stable if more ABIs are ever added.
+val abiCodes = mapOf(
+    "armeabi-v7a" to 1,
+    "arm64-v8a" to 2,
+    "x86" to 3,
+    "x86_64" to 4,
+)
+
+// Modern AGP variant API (androidComponents) — unlike the old
+// output.versionCodeOverride, this works alongside the Kotlin Multiplatform
+// plugin because it sets the version code lazily at execution time.
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            val abi = output.filters
+                .find { it.filterType == FilterConfiguration.FilterType.ABI }
+                ?.identifier
+            abiCodes[abi]?.let { offset ->
+                output.versionCode.set(offset + (output.versionCode.get() ?: 0))
+            }
+        }
     }
 }
