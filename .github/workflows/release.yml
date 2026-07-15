@@ -51,14 +51,15 @@ jobs:
           KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: ./gradlew :composeApp:assembleRelease
 
-      - name: Rename APK
+      - name: Rename APKs
         id: apk
         run: |
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          SRC=composeApp/build/outputs/apk/release/composeApp-release.apk
-          OUT="localmathy-${TAG}.apk"
-          cp "$SRC" "$OUT"
-          echo "path=$OUT" >> "$GITHUB_OUTPUT"
+          DIR=composeApp/build/outputs/apk/release
+          ls -la "$DIR"   # handy for debugging future output changes
+          cp "$DIR/composeApp-universal-release.apk"  "localmathy-${TAG}-universal.apk"
+          cp "$DIR/composeApp-arm64-v8a-release.apk"  "localmathy-${TAG}-arm64-v8a.apk"
+          cp "$DIR/composeApp-x86_64-release.apk"     "localmathy-${TAG}-x86_64.apk"
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -66,4 +67,7 @@ jobs:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           name: LocalMathy ${{ github.event.inputs.tag || github.ref_name }}
           generate_release_notes: true
-          files: ${{ steps.apk.outputs.path }}
+          files: |
+            localmathy-*-universal.apk
+            localmathy-*-arm64-v8a.apk
+            localmathy-*-x86_64.apk
